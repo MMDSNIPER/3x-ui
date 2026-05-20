@@ -17,15 +17,17 @@ import (
 
 // InboundController handles HTTP requests related to Xray inbounds management.
 type InboundController struct {
-	inboundService  service.InboundService
-	xrayService     service.XrayService
-	fallbackService service.FallbackService
+    inboundService  service.InboundService
+    xrayService     service.XrayService
+    fallbackService service.FallbackService
+    userService     service.UserService    // ← add
 }
 
 // NewInboundController creates a new InboundController and sets up its routes.
 func NewInboundController(g *gin.RouterGroup) *InboundController {
 	a := &InboundController{}
 	a.initRouter(g)
+ a.userService = service.UserService{}
 	return a
 }
 
