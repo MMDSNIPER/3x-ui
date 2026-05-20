@@ -151,111 +151,114 @@ onMounted(async () => {
       <AppSidebar :base-path="basePath" :request-uri="requestUri" />
       <a-layout-content style="padding: 24px">
 
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px">
-          <h2 style="margin:0; display:flex; align-items:center; gap:8px">
-            <SafetyOutlined />
-            {{ t('menu.admins') }}
-          </h2>
-          <a-button type="primary" @click="openCreate">
-            <template #icon><PlusOutlined /></template>
-            {{ t('pages.admins.addAdmin') }}
-          </a-button>
-        </div>
+```
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px">
+      <h2 style="margin:0; display:flex; align-items:center; gap:8px">
+        <SafetyOutlined />
+        {{ t('menu.admins') }}
+      </h2>
+      <a-button type="primary" @click="openCreate">
+        <template #icon><PlusOutlined /></template>
+        {{ t('pages.admins.addAdmin') }}
+      </a-button>
+    </div>
 
-        <a-table
-          :columns="columns"
-          :data-source="admins"
-          :loading="loading"
-          row-key="id"
-          :pagination="false"
-          bordered
-        >
-          <template #bodyCell="{ column, record }">
-            <template v-if="column.key === 'allowedInbounds'">
-              <a-tag v-if="!parseAllowedIds(record).length" color="warning">
-                {{ t('pages.admins.noInbounds') }}
-              </a-tag>
-              <template v-else>
-                <a-tag
-                  v-for="id in parseAllowedIds(record)"
-                  :key="id"
-                  color="blue"
-                  style="margin-bottom:2px"
-                >
-                  {{
-                    (() => {
-                      const opt = inboundOptions.find((o) => o.id === id);
-                      return opt ? `${opt.remark || opt.protocol}:${opt.port}` : `#${id}`;
-                    })()
-                  }}
-                </a-tag>
-              </template>
-            </template>
-
-            <template v-else-if="column.key === 'actions'">
-              <a-space>
-                <a-tooltip :title="t('edit')">
-                  <a-button size="small" @click="openEdit(record)">
-                    <template #icon><EditOutlined /></template>
-                  </a-button>
-                </a-tooltip>
-                <a-tooltip :title="t('delete')">
-                  <a-button size="small" danger @click="confirmDelete(record)">
-                    <template #icon><DeleteOutlined /></template>
-                  </a-button>
-                </a-tooltip>
-              </a-space>
-            </template>
-          </template>
-        </a-table>
-
-      </a-layout-content>
-    </a-layout>
-
-    <!-- Create / Edit modal -->
-    <a-modal
-      v-model:open="modalOpen"
-      :title="isEdit ? t('pages.admins.editAdmin') : t('pages.admins.addAdmin')"
-      :ok-text="t('save')"
-      :confirm-loading="saving"
-      :destroy-on-close="true"
-      @ok="save"
+    <a-table
+      :columns="columns"
+      :data-source="admins"
+      :loading="loading"
+      row-key="id"
+      :pagination="false"
+      bordered
     >
-      <a-form layout="vertical" style="margin-top:8px">
-        <a-form-item :label="t('username')">
-          <a-input v-model:value="form.username" :placeholder="t('username')" />
-        </a-form-item>
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.key === 'allowedInbounds'">
+          <a-tag v-if="!parseAllowedIds(record).length" color="warning">
+            {{ t('pages.admins.noInbounds') }}
+          </a-tag>
+          <template v-else>
+            <a-tag
+              v-for="id in parseAllowedIds(record)"
+              :key="id"
+              color="blue"
+              style="margin-bottom:2px"
+            >
+              {{
+                (() => {
+                  const opt = inboundOptions.find((o) => o.id === id);
+                  return opt ? `${opt.remark || opt.protocol}:${opt.port}` : `#${id}`;
+                })()
+              }}
+            </a-tag>
+          </template>
+        </template>
 
-        <a-form-item :label="t('password')">
-          <a-input-password
-            v-model:value="form.password"
-            :placeholder="isEdit ? t('pages.admins.leaveBlankToKeep') : t('password')"
-          />
-        </a-form-item>
+        <template v-else-if="column.key === 'actions'">
+          <a-space>
+            <a-tooltip :title="t('edit')">
+              <a-button size="small" @click="openEdit(record)">
+                <template #icon><EditOutlined /></template>
+              </a-button>
+            </a-tooltip>
+            <a-tooltip :title="t('delete')">
+              <a-button size="small" danger @click="confirmDelete(record)">
+                <template #icon><DeleteOutlined /></template>
+              </a-button>
+            </a-tooltip>
+          </a-space>
+        </template>
+      </template>
+    </a-table>
 
-        <a-form-item :label="t('pages.admins.confirmPassword')">
-          <a-input-password
-            v-model:value="form.confirmPassword"
-            :placeholder="t('pages.admins.confirmPassword')"
-          />
-        </a-form-item>
+  </a-layout-content>
+</a-layout>
 
-        <a-form-item :label="t('pages.admins.allowedInbounds')">
-          <a-select
-            v-model:value="form.allowedInbounds"
-            mode="multiple"
-            :placeholder="t('pages.admins.selectInbounds')"
-            :options="inboundOptions.map((o) => ({
-              value: o.id,
-              label: `${o.remark || o.protocol} :${o.port}`,
-            }))"
-            style="width:100%"
-          />
-          <div style="margin-top:4px; opacity:0.65; font-size:12px">
-            {{ t('pages.admins.inboundsHint') }}
-          </div>
-        </a-form-item>
-      </a-form>
-    </a-modal>
+<!-- Create / Edit modal -->
+<a-modal
+  v-model:open="modalOpen"
+  :title="isEdit ? t('pages.admins.editAdmin') : t('pages.admins.addAdmin')"
+  :ok-text="t('save')"
+  :confirm-loading="saving"
+  :destroy-on-close="true"
+  @ok="save"
+>
+  <a-form layout="vertical" style="margin-top:8px">
+    <a-form-item :label="t('username')">
+      <a-input v-model:value="form.username" :placeholder="t('username')" />
+    </a-form-item>
+
+    <a-form-item :label="t('password')">
+      <a-input-password
+        v-model:value="form.password"
+        :placeholder="isEdit ? t('pages.admins.leaveBlankToKeep') : t('password')"
+      />
+    </a-form-item>
+
+    <a-form-item :label="t('pages.admins.confirmPassword')">
+      <a-input-password
+        v-model:value="form.confirmPassword"
+        :placeholder="t('pages.admins.confirmPassword')"
+      />
+    </a-form-item>
+
+    <a-form-item :label="t('pages.admins.allowedInbounds')">
+      <a-select
+        v-model:value="form.allowedInbounds"
+        mode="multiple"
+        :placeholder="t('pages.admins.selectInbounds')"
+        :options="inboundOptions.map((o) => ({
+          value: o.id,
+          label: `${o.remark || o.protocol} :${o.port}`,
+        }))"
+        style="width:100%"
+      />
+      <div style="margin-top:4px; opacity:0.65; font-size:12px">
+        {{ t('pages.admins.inboundsHint') }}
+      </div>
+    </a-form-item>
+  </a-form>
+</a-modal>
+```
+
   </a-config-provider>
 </template>
