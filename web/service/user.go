@@ -186,8 +186,7 @@ func (s *UserService) GetAdminUser() (*model.User, error) {
 	}
 	return user, nil
 }
- 
-// GetAllSubAdmins lists every user whose role is "sub-admin".
+
 func (s *UserService) GetAllSubAdmins() ([]*model.User, error) {
 	db := database.GetDB()
 	var users []*model.User
@@ -197,9 +196,7 @@ func (s *UserService) GetAllSubAdmins() ([]*model.User, error) {
 	}
 	return users, err
 }
- 
-// CreateSubAdmin inserts a new sub-admin with bcrypt-hashed password and the
-// given allowed inbound IDs (stored as a JSON array string).
+
 func (s *UserService) CreateSubAdmin(username, password string, allowedInbounds []int) (*model.User, error) {
 	db := database.GetDB()
 	hashed, err := crypto.HashPasswordAsBcrypt(password)
@@ -222,9 +219,7 @@ func (s *UserService) CreateSubAdmin(username, password string, allowedInbounds 
 	user.Password = ""
 	return user, nil
 }
- 
-// UpdateSubAdmin updates a sub-admin record.  Password is re-hashed only when
-// the caller supplies a non-empty string; omitting it leaves it unchanged.
+
 func (s *UserService) UpdateSubAdmin(id int, username, password string, allowedInbounds []int) error {
 	db := database.GetDB()
 	allowedJSON, err := json.Marshal(allowedInbounds)
@@ -245,11 +240,22 @@ func (s *UserService) UpdateSubAdmin(id int, username, password string, allowedI
 	}
 	return db.Model(model.User{}).Where("id = ? AND role = ?", id, "sub-admin").Updates(updates).Error
 }
- 
-// DeleteSubAdmin removes a sub-admin by ID. Refuses to delete a non-sub-admin row.
+
 func (s *UserService) DeleteSubAdmin(id int) error {
 	db := database.GetDB()
 	return db.Delete(&model.User{}, "id = ? AND role = ?", id, "sub-admin").Error
+}
+
+func (s *UserService) GetAllowedInboundIDs(user *model.User) []int {
+	if user.Role == "admin" || user.Role == "" {
+		return nil
+	}
+	var ids []int
+	if user.AllowedInbounds == "" || user.AllowedInbounds == "[]" {
+		return ids
+	}
+	_ = json.Unmarshal([]byte(user.AllowedInbounds), &ids)
+	return ids
 }
  
 // GetAllowedInboundIDs parses the JSON AllowedInbounds column and returns the
