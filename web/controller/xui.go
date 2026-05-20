@@ -27,25 +27,28 @@ func NewXUIController(g *gin.RouterGroup) *XUIController {
 
 // initRouter sets up the main panel routes and initializes sub-controllers.
 func (a *XUIController) initRouter(g *gin.RouterGroup) {
-	g = g.Group("/panel")
-	g.Use(a.checkLogin)
-	g.Use(middleware.CSRFMiddleware())
+    g = g.Group("/panel")
+    g.Use(a.checkLogin)
+    g.Use(middleware.CSRFMiddleware())
 
-	g.GET("/", a.index)
-	g.GET("/inbounds", a.inbounds)
-	g.GET("/clients", a.clients)
-	g.GET("/nodes", a.nodes)
-	g.GET("/settings", a.settings)
-	g.GET("/xray", a.xraySettings)
-	g.GET("/api-docs", a.apiDocs)
+    g.GET("/", a.index)
+    g.GET("/inbounds", a.inbounds)
+    g.GET("/clients", a.clients)
+    g.GET("/nodes", a.nodes)
+    g.GET("/settings", a.settings)
+    g.GET("/xray", a.xraySettings)
+    g.GET("/api-docs", a.apiDocs)
+    g.GET("/admins", a.admins)          // <-- new
 
-	// SPA pages built by Vite don't have a server-rendered <meta name="csrf-token">,
-	// so they fetch the session token via this endpoint at startup and replay it
-	// on subsequent unsafe requests through axios.
-	g.GET("/csrf-token", a.csrfToken)
+    g.GET("/csrf-token", a.csrfToken)
 
-	a.settingController = NewSettingController(g)
-	a.xraySettingController = NewXraySettingController(g)
+    a.settingController = NewSettingController(g)
+    a.xraySettingController = NewXraySettingController(g)
+    NewAdminController(g.Group("/api")) // <-- new
+}
+
+func (a *XUIController) admins(c *gin.Context) {
+	serveDistPage(c, "admins.html")
 }
 
 // All four panel pages now serve the Vue 3 builds from web/dist/

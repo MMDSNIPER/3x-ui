@@ -98,6 +98,7 @@
     "inbounds": "ورودی‌ها",
     "clients": "کلاینت‌ها",
     "nodes": "نودها",
+    "admins": "Admins",
     "settings": "تنظیمات پنل",
     "xray": "پیکربندی ایکس‌ری",
     "apiDocs": "مستندات API",
@@ -116,6 +117,20 @@
         "wrongUsernameOrPassword": "نام کاربری، رمز عبور یا کد دو مرحله‌ای نامعتبر است.",
         "successLogin": "شما با موفقیت به حساب کاربری خود وارد شدید."
       }
+    },
+    "admins": {
+      "addAdmin": "Add Admin",
+      "editAdmin": "Edit Admin",
+      "allowedInbounds": "Allowed Inbounds",
+      "actions": "Actions",
+      "selectInbounds": "Select inbounds this admin can access",
+      "inboundsHint": "Leave empty to grant access to no inbounds.",
+      "noInbounds": "No inbounds",
+      "leaveBlankToKeep": "Leave blank to keep current password",
+      "confirmPassword": "Confirm Password",
+      "passwordMismatch": "Passwords do not match",
+      "deleteTitle": "Delete Admin",
+      "deleteContent": "Are you sure you want to delete admin \"{username}\"?"
     },
     "index": {
       "title": "نمای کلی",

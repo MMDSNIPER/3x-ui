@@ -122,6 +122,24 @@ func (s *InboundService) enrichClientStats(db *gorm.DB, inbounds []*model.Inboun
 	}
 }
 
+func (s *InboundService) GetInboundsByIDs(ownerUserId int, ids []int) ([]*model.Inbound, error) {
+	if len(ids) == 0 {
+		return []*model.Inbound{}, nil
+	}
+	db := database.GetDB()
+	var inbounds []*model.Inbound
+	err := db.Model(model.Inbound{}).
+		Preload("ClientStats").
+		Where("user_id = ? AND id IN ?", ownerUserId, ids).
+		Find(&inbounds).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	s.enrichClientStats(db, inbounds)
+	s.annotateFallbackParents(db, inbounds)
+	return inbounds, nil
+}
+
 // GetInbounds retrieves all inbounds for a specific user with client stats.
 func (s *InboundService) GetInbounds(userId int) ([]*model.Inbound, error) {
 	db := database.GetDB()

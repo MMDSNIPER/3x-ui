@@ -78,6 +78,21 @@ func (a *InboundController) initRouter(g *gin.RouterGroup) {
 // getInbounds retrieves the list of inbounds for the logged-in user.
 func (a *InboundController) getInbounds(c *gin.Context) {
 	user := session.GetLoginUser(c)
+	if user.Role == "sub-admin" {
+		adminUser, err := a.userService.GetAdminUser()
+		if err != nil {
+			jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
+			return
+		}
+		allowedIDs := a.userService.GetAllowedInboundIDs(user)
+		inbounds, err := a.inboundService.GetInboundsByIDs(adminUser.Id, allowedIDs)
+		if err != nil {
+			jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
+			return
+		}
+		jsonObj(c, inbounds, nil)
+		return
+	}
 	inbounds, err := a.inboundService.GetInbounds(user.Id)
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
@@ -86,11 +101,36 @@ func (a *InboundController) getInbounds(c *gin.Context) {
 	jsonObj(c, inbounds, nil)
 }
 
+
 // getInboundOptions returns a lightweight projection of the user's inbounds
 // (id, remark, protocol, port, tlsFlowCapable) for pickers in the clients UI.
 // Avoids shipping per-client settings and traffic stats just to fill a dropdown.
 func (a *InboundController) getInboundOptions(c *gin.Context) {
 	user := session.GetLoginUser(c)
+	if user.Role == "sub-admin" {
+		adminUser, err := a.userService.GetAdminUser()
+		if err != nil {
+			jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
+			return
+		}
+		allowedIDs := a.userService.GetAllowedInboundIDs(user)
+		inbounds, err := a.inboundService.GetInboundsByIDs(adminUser.Id, allowedIDs)
+		if err != nil {
+			jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
+			return
+		}
+		options := make([]any, 0, len(inbounds))
+		for _, ib := range inbounds {
+			options = append(options, map[string]any{
+				"id":       ib.Id,
+				"remark":   ib.Remark,
+				"protocol": ib.Protocol,
+				"port":     ib.Port,
+			})
+		}
+		jsonObj(c, options, nil)
+		return
+	}
 	options, err := a.inboundService.GetInboundOptions(user.Id)
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
@@ -98,6 +138,7 @@ func (a *InboundController) getInboundOptions(c *gin.Context) {
 	}
 	jsonObj(c, options, nil)
 }
+
 
 // getInbound retrieves a specific inbound by its ID.
 func (a *InboundController) getInbound(c *gin.Context) {

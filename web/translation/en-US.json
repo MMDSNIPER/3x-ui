@@ -92,6 +92,7 @@
   },
   "menu": {
     "theme": "Theme",
+    "admins": "Admins",
     "dark": "Dark",
     "ultraDark": "Ultra Dark",
     "dashboard": "Overview",
@@ -116,6 +117,20 @@
         "wrongUsernameOrPassword": "Invalid username or password or two-factor code.",
         "successLogin": "You have successfully logged into your account."
       }
+    },
+    "admins": {
+      "addAdmin": "Add Admin",
+      "editAdmin": "Edit Admin",
+      "allowedInbounds": "Allowed Inbounds",
+      "actions": "Actions",
+      "selectInbounds": "Select inbounds this admin can access",
+      "inboundsHint": "Leave empty to grant access to no inbounds.",
+      "noInbounds": "No inbounds",
+      "leaveBlankToKeep": "Leave blank to keep current password",
+      "confirmPassword": "Confirm Password",
+      "passwordMismatch": "Passwords do not match",
+      "deleteTitle": "Delete Admin",
+      "deleteContent": "Are you sure you want to delete admin \"{username}\"?"
     },
     "index": {
       "title": "Overview",
