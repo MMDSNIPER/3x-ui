@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
   PlusOutlined,
@@ -10,10 +10,9 @@ import {
 import { message, Modal } from 'ant-design-vue';
 import AppSidebar from '@/components/AppSidebar.vue';
 import { HttpUtil } from '@/utils';
-import { useTheme } from '@/composables/useTheme.js';
+import { antdThemeConfig, theme } from '@/composables/useTheme.js';
 
 const { t } = useI18n();
-import { theme, currentTheme, antdThemeConfig } from '@/composables/useTheme.js';
 
 const basePath = window.X_UI_BASE_PATH ?? '/';
 const requestUri = window.location.pathname;
@@ -40,21 +39,15 @@ const columns = [
   { title: t('pages.admins.actions'), key: 'actions', width: 120, align: 'center' },
 ];
 
-function getAllowedLabels(admin) {
-  const ids = parseAllowedIds(admin);
-  if (!ids.length) return t('pages.admins.noInbounds');
-  return ids
-    .map((id) => {
-      const opt = inboundOptions.value.find((o) => o.id === id);
-      return opt ? `${opt.remark || opt.protocol} :${opt.port}` : `#${id}`;
-    })
-    .join(', ');
-}
-
 function parseAllowedIds(admin) {
   if (!admin.allowedInbounds) return [];
   if (Array.isArray(admin.allowedInbounds)) return admin.allowedInbounds;
   try { return JSON.parse(admin.allowedInbounds); } catch { return []; }
+}
+
+function inboundLabel(id) {
+  const opt = inboundOptions.value.find((o) => o.id === id);
+  return opt ? `${opt.remark || opt.protocol}:${opt.port}` : `#${id}`;
 }
 
 async function fetchAdmins() {
@@ -111,12 +104,9 @@ async function save() {
       password: form.value.password,
       allowedInbounds: form.value.allowedInbounds,
     };
-    let msg;
-    if (isEdit.value) {
-      msg = await HttpUtil.put(`/panel/api/admins/${editingId.value}`, payload);
-    } else {
-      msg = await HttpUtil.post('/panel/api/admins', payload);
-    }
+    const msg = isEdit.value
+      ? await HttpUtil.put(`/panel/api/admins/${editingId.value}`, payload)
+      : await HttpUtil.post('/panel/api/admins', payload);
     if (msg?.success) {
       modalOpen.value = false;
       await fetchAdmins();
@@ -146,8 +136,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <a-config-provider :theme="{ algorithm: isDark ? undefined : undefined }">
-    <a-layout style="min-height: 100vh">
+  <a-config-provider :theme="antdThemeConfig">
+    <a-layout :class="{ 'is-dark': theme.isDark }" style="min-height: 100vh">
       <AppSidebar :base-path="basePath" :request-uri="requestUri" />
       <a-layout-content style="padding: 24px">
 
@@ -183,12 +173,7 @@ onMounted(async () => {
               color="blue"
               style="margin-bottom:2px"
             >
-              {{
-                (() => {
-                  const opt = inboundOptions.find((o) => o.id === id);
-                  return opt ? `${opt.remark || opt.protocol}:${opt.port}` : `#${id}`;
-                })()
-              }}
+              {{ inboundLabel(id) }}
             </a-tag>
           </template>
         </template>
@@ -248,7 +233,7 @@ onMounted(async () => {
         :placeholder="t('pages.admins.selectInbounds')"
         :options="inboundOptions.map((o) => ({
           value: o.id,
-          label: `${o.remark || o.protocol} :${o.port}`,
+          label: `${o.remark || o.protocol}:${o.port}`,
         }))"
         style="width:100%"
       />
