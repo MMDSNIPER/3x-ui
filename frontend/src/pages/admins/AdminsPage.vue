@@ -13,7 +13,7 @@ import { HttpUtil } from '@/utils';
 import { useTheme } from '@/composables/useTheme.js';
 
 const { t } = useI18n();
-const { currentTheme, isDark } = useTheme?.() ?? { currentTheme: ref('light'), isDark: ref(false) };
+import { theme, currentTheme, antdThemeConfig } from '@/composables/useTheme.js';
 
 const basePath = window.X_UI_BASE_PATH ?? '/';
 const requestUri = window.location.pathname;
