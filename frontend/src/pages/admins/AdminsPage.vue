@@ -106,7 +106,7 @@ async function save() {
     };
     const msg = isEdit.value
       ? await HttpUtil.put(`${basePath}panel/api/admins/${editingId.value}`, payload)
-      : await HttpUtil.post('${basePath}panel/api/admins', payload);
+      : await HttpUtil.post(`${basePath}panel/api/admins`, payload);
     if (msg?.success) {
       modalOpen.value = false;
       await fetchAdmins();
