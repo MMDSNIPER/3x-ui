@@ -75,6 +75,9 @@ func (a *APIController) initRouter(g *gin.RouterGroup, customGeo *service.Custom
 	// Nodes API — multi-panel management
 	nodes := api.Group("/nodes")
 	a.nodeController = NewNodeController(nodes)
+	
+	admins := api.Group("/admins")
+	NewAdminController(admins)
 
 	NewCustomGeoController(api.Group("/custom-geo"), customGeo)
 
