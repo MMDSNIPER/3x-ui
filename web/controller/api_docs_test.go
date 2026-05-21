@@ -81,6 +81,8 @@ func TestAPIRoutesDocumented(t *testing.T) {
 		switch entry.Name() {
 		case "index.go":
 			basePath = ""
+		case "admin.go":
+    		basePath = "/panel/api/admins"
 		case "xui.go":
 			basePath = "/panel"
 		case "api.go":
