@@ -104,9 +104,12 @@ async function save() {
       password: form.value.password,
       allowedInbounds: form.value.allowedInbounds,
     };
-    const msg = isEdit.value
-      ? await HttpUtil.post(basePath + 'panel/api/admins', payload)
-      : await HttpUtil.put(basePath + 'panel/api/admins/' + editingId.value, payload);
+    let msg;
+    if (isEdit.value) {
+      msg = await HttpUtil.post(basePath + 'panel/api/admins/update/' + editingId.value, payload);
+    } else {
+      msg = await HttpUtil.post(basePath + 'panel/api/admins', payload);
+    }
     if (msg?.success) {
       modalOpen.value = false;
       await fetchAdmins();
@@ -126,8 +129,8 @@ function confirmDelete(admin) {
 }
 
 async function doDelete(id) {
-    const msg = await HttpUtil.delete(basePath + 'panel/api/admins/' + id);
-    if (msg?.success) await fetchAdmins();
+  const msg = await HttpUtil.post(basePath + 'panel/api/admins/delete/' + id);
+  if (msg?.success) await fetchAdmins();
 }
 
 onMounted(async () => {
@@ -232,7 +235,7 @@ onMounted(async () => {
             :placeholder="t('pages.admins.selectInbounds')"
             :options="inboundOptions.map((o) => ({
               value: o.id,
-              label: `${o.remark || o.protocol}:${o.port}`,
+              label: (o.remark || o.protocol) + ':' + o.port,
             }))"
             style="width:100%"
           />

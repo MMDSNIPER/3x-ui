@@ -58,6 +58,8 @@ export const sections = [
         response:
           '{\n  "success": true,\n  "obj": "csrf-token-string"\n}',
       },
+      { method: 'POST', path: '/panel/api/admins/update/:id', summary: 'Update a sub-admin.' },
+      { method: 'POST', path: '/panel/api/admins/delete/:id', summary: 'Delete a sub-admin by ID.' },
       {
         method: 'GET',
         path: '/panel/api/admins/me',
@@ -72,16 +74,6 @@ export const sections = [
         method: 'POST',
         path: '/panel/api/admins',
         summary: 'Create a sub-admin. Main admin only.',
-      },
-      {
-        method: 'PUT',
-        path: '/panel/api/admins/:id',
-        summary: 'Update a sub-admin username, password or allowed inbounds. Main admin only.',
-      },
-      {
-        method: 'DELETE',
-        path: '/panel/api/admins/:id',
-        summary: 'Delete a sub-admin by ID. Main admin only.',
       },
       {
         method: 'GET',

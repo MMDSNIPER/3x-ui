@@ -30,13 +30,12 @@ type subAdminForm struct {
 }
 
 func (a *AdminController) initRouter(g *gin.RouterGroup) {
-	g = g.Group("/admins")
-	g.GET("/me", a.me)
-	g.Use(a.requireMainAdmin)
-	g.GET("", a.getAdmins)
-	g.POST("", a.createAdmin)
-	g.PUT("/:id", a.updateAdmin)
-	g.DELETE("/:id", a.deleteAdmin)
+    g.GET("/me", a.me)
+    g.Use(a.requireMainAdmin)
+    g.GET("", a.getAdmins)
+    g.POST("", a.createAdmin)
+    g.POST("/update/:id", a.updateAdmin)
+    g.POST("/delete/:id", a.deleteAdmin)
 }
 
 func (a *AdminController) requireMainAdmin(c *gin.Context) {
