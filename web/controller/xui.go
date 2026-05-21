@@ -38,13 +38,11 @@ func (a *XUIController) initRouter(g *gin.RouterGroup) {
     g.GET("/settings", a.settings)
     g.GET("/xray", a.xraySettings)
     g.GET("/api-docs", a.apiDocs)
-    g.GET("/admins", a.admins)          // <-- new
 
     g.GET("/csrf-token", a.csrfToken)
 
     a.settingController = NewSettingController(g)
     a.xraySettingController = NewXraySettingController(g)
-    NewAdminController(g.Group("/api")) // <-- new
 }
 
 func (a *XUIController) admins(c *gin.Context) {

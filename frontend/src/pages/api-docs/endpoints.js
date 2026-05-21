@@ -59,6 +59,11 @@ export const sections = [
           '{\n  "success": true,\n  "obj": "csrf-token-string"\n}',
       },
       {
+        method: 'GET',
+        path: '/panel/api/inbounds/options',
+        summary: 'Lightweight list of inbound IDs, remarks, protocols and ports. Used by pickers.',
+      },
+      {
         method: 'POST',
         path: '/getTwoFactorEnable',
         summary: 'Returns whether 2FA is enabled on the panel — used by the login page to decide whether to show the OTP field.',
