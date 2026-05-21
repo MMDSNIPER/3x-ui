@@ -45,7 +45,7 @@ const userRole = ref('admin');
 
 onMounted(async () => {
   try {
-    const msg = await HttpUtil.get('/panel/api/admins/me');
+    const msg = await HttpUtil.get('${basePath}panel/api/admins/me');
     if (msg?.success && msg.obj?.role) {
       userRole.value = msg.obj.role;
     }
