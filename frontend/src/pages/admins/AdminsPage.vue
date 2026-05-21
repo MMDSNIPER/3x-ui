@@ -105,7 +105,7 @@ async function save() {
       allowedInbounds: form.value.allowedInbounds,
     };
     const msg = isEdit.value
-      ? await HttpUtil.post(basePath + 'panel/api/admins', payload);
+      ? await HttpUtil.post(basePath + 'panel/api/admins', payload)
       : await HttpUtil.put(basePath + 'panel/api/admins/' + editingId.value, payload);
     if (msg?.success) {
       modalOpen.value = false;
