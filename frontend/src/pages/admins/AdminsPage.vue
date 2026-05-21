@@ -50,7 +50,7 @@ function inboundLabel(id) {
   return opt ? `${opt.remark || opt.protocol}:${opt.port}` : `#${id}`;
 }
 
-async function fetchAdmins() {panel/api/admins`);
+async function fetchAdmins() {
   loading.value = true;
   try {
     const msg = await HttpUtil.get(basePath + 'panel/api/admins');
