@@ -60,6 +60,31 @@ export const sections = [
       },
       {
         method: 'GET',
+        path: '/panel/api/admins/me',
+        summary: 'Return current session user role and allowed inbound IDs.',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/admins',
+        summary: 'List all sub-admins. Main admin only.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/admins',
+        summary: 'Create a sub-admin. Main admin only.',
+      },
+      {
+        method: 'PUT',
+        path: '/panel/api/admins/:id',
+        summary: 'Update a sub-admin username, password or allowed inbounds. Main admin only.',
+      },
+      {
+        method: 'DELETE',
+        path: '/panel/api/admins/:id',
+        summary: 'Delete a sub-admin by ID. Main admin only.',
+      },
+      {
+        method: 'GET',
         path: '/panel/api/inbounds/options',
         summary: 'Lightweight list of inbound IDs, remarks, protocols and ports. Used by pickers.',
       },
