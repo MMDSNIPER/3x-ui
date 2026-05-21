@@ -53,7 +53,7 @@ function inboundLabel(id) {
 async function fetchAdmins() {panel/api/admins`);
   loading.value = true;
   try {
-    const msg = await HttpUtil.get(`${basePath}panel/api/admins`);
+    const msg = await HttpUtil.get(basePath + 'panel/api/admins');
     if (msg?.success) admins.value = msg.obj ?? [];
   } finally {
     loading.value = false;
@@ -61,8 +61,8 @@ async function fetchAdmins() {panel/api/admins`);
 }
 
 async function fetchInbounds() {
-  const msg = await HttpUtil.get(`${basePath}panel/api/inbounds/options`);
-  if (msg?.success) inboundOptions.value = msg.obj ?? [];
+    const msg = await HttpUtil.get(basePath + 'panel/api/inbounds/options');
+    if (msg?.success) inboundOptions.value = msg.obj ?? [];
 }
 
 function openCreate() {
@@ -105,8 +105,8 @@ async function save() {
       allowedInbounds: form.value.allowedInbounds,
     };
     const msg = isEdit.value
-      ? await HttpUtil.put(`${basePath}panel/api/admins/${editingId.value}`, payload)
-      : await HttpUtil.post(`${basePath}panel/api/admins`, payload);
+      ? await HttpUtil.post(basePath + 'panel/api/admins', payload);
+      : await HttpUtil.put(basePath + 'panel/api/admins/' + editingId.value, payload);
     if (msg?.success) {
       modalOpen.value = false;
       await fetchAdmins();
@@ -126,8 +126,8 @@ function confirmDelete(admin) {
 }
 
 async function doDelete(id) {
-  const msg = await HttpUtil.delete(`${basePath}panel/api/admins/${id}`);
-  if (msg?.success) await fetchAdmins();
+    const msg = await HttpUtil.delete(basePath + 'panel/api/admins/' + id);
+    if (msg?.success) await fetchAdmins();
 }
 
 onMounted(async () => {
