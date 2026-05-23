@@ -111,18 +111,24 @@ export default function AppSidebar({ basePath = '', requestUri = '' }: AppSideba
   const currentTheme: 'light' | 'dark' = isDark ? 'dark' : 'light';
   const panelVersion = window.X_UI_CUR_VER || '';
 
-  const tabs = useMemo<{ key: string; icon: IconName; title: string }[]>(() => [
-    { key: `${prefix}panel/`, icon: 'dashboard', title: t('menu.dashboard') },
-    { key: `${prefix}panel/inbounds`, icon: 'user', title: t('menu.inbounds') },
-    { key: `${prefix}panel/clients`, icon: 'team', title: t('menu.clients') },
-    { key: `${prefix}panel/nodes`, icon: 'cluster', title: t('menu.nodes') },
-    { key: `${prefix}panel/settings`, icon: 'setting', title: t('menu.settings') },
-    { key: `${prefix}panel/xray`, icon: 'tool', title: t('menu.xray') },
-    { key: `${prefix}panel/api-docs`, icon: 'apidocs', title: t('menu.apiDocs') },
-    { key: 'logout', icon: 'logout', title: t('logout') },
+  const isOwner = (window.X_UI_USER_ROLE ?? '') === 'owner';
+
+  const tabs = useMemo<{ key: string; icon: IconName; title: string; ownerOnly?: boolean }[]>(() => [
+    { key: `${prefix}panel/`,         icon: 'dashboard', title: t('menu.dashboard') },
+    { key: `${prefix}panel/inbounds`, icon: 'user',      title: t('menu.inbounds') },
+    { key: `${prefix}panel/clients`,  icon: 'team',      title: t('menu.clients') },
+    { key: `${prefix}panel/nodes`,    icon: 'cluster',   title: t('menu.nodes'), ownerOnly: true },
+    { key: `${prefix}panel/admins`,   icon: 'team',      title: t('menu.admins'), ownerOnly: true },
+    { key: `${prefix}panel/settings`, icon: 'setting',   title: t('menu.settings'), ownerOnly: true },
+    { key: `${prefix}panel/xray`,     icon: 'tool',      title: t('menu.xray'), ownerOnly: true },
+    { key: `${prefix}panel/api-docs`, icon: 'apidocs',   title: t('menu.apiDocs'), ownerOnly: true },
+    { key: 'logout',                  icon: 'logout',    title: t('logout') },
   ], [prefix, t]);
 
-  const navItems = useMemo(() => tabs.filter((tab) => tab.icon !== 'logout'), [tabs]);
+  const navItems  = useMemo(
+    () => tabs.filter((tab) => tab.icon !== 'logout' && (!tab.ownerOnly || isOwner)),
+    [tabs, isOwner],
+  );
   const utilItems = useMemo(() => tabs.filter((tab) => tab.icon === 'logout'), [tabs]);
 
   const toMenuItems = useCallback((items: typeof tabs): MenuProps['items'] =>

@@ -38,6 +38,7 @@ func (a *XUIController) initRouter(g *gin.RouterGroup) {
 	g.GET("/settings", a.settings)
 	g.GET("/xray", a.xraySettings)
 	g.GET("/api-docs", a.apiDocs)
+	g.GET("/admins", a.admins)
 
 	// SPA pages built by Vite don't have a server-rendered <meta name="csrf-token">,
 	// so they fetch the session token via this endpoint at startup and replay it
@@ -87,6 +88,9 @@ func (a *XUIController) apiDocs(c *gin.Context) {
 	serveDistPage(c, "api-docs.html")
 }
 
+func (a *XUIController) admins(c *gin.Context) {
+    serveDistPage(c, "admins.html")
+}
 // csrfToken returns the session CSRF token to authenticated SPA clients.
 // The endpoint is GET (a safe method) so it bypasses CSRFMiddleware itself,
 // but checkLogin still gates the response — anonymous callers get 401/redirect.

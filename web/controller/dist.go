@@ -66,6 +66,9 @@ func serveDistPage(c *gin.Context, name string) {
 	if name != "login.html" {
 		escapedVer := jsEscape.Replace(config.GetVersion())
 		script += `;window.X_UI_CUR_VER="` + escapedVer + `"`
+		if u := session.GetLoginUser(c); u != nil {
+			script += `;window.X_UI_USER_ROLE="` + jsEscape.Replace(u.Role) + `"`
+		}
 	}
 	script += `;</script>`
 	inject := []byte(script)

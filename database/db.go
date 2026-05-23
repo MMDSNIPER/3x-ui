@@ -127,6 +127,7 @@ func initUser() error {
 		user := &model.User{
 			Username: defaultUsername,
 			Password: hashedPassword,
+			Role:     "owner",
 		}
 		return db.Create(user).Error
 	}

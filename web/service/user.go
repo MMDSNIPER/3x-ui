@@ -165,3 +165,52 @@ func (s *UserService) UpdateFirstUser(username string, password string) error {
 	user.LoginEpoch++
 	return db.Save(user).Error
 }
+
+func (s *UserService) ListSubAdmins() ([]*model.User, error) {
+    db := database.GetDB()
+    var users []*model.User
+    // Don't return the owner
+    err := db.Model(model.User{}).Where("role != 'owner'").Find(&users).Error
+    // Scrub passwords before returning
+    for _, u := range users { u.Password = "" }
+    return users, err
+}
+
+func (s *UserService) CreateSubAdmin(username, password string, allowedInboundIDs []int) error {
+    db := database.GetDB()
+    hashed, err := crypto.HashPasswordAsBcrypt(password)
+    if err != nil { return err }
+    idsJSON, _ := json.Marshal(allowedInboundIDs)
+    user := &model.User{
+        Username:        username,
+        Password:        hashed,
+        Role:            "admin",
+        AllowedInbounds: string(idsJSON),
+    }
+    return db.Create(user).Error
+}
+
+func (s *UserService) UpdateSubAdmin(id int, username, password string, allowedInboundIDs []int) error {
+    db := database.GetDB()
+    // Prevent modifying the owner
+    var existing model.User
+    if err := db.First(&existing, id).Error; err != nil { return err }
+    if existing.Role == "owner" { return errors.New("cannot modify owner") }
+
+    updates := map[string]any{
+        "username":         username,
+        "allowed_inbounds": mustJSON(allowedInboundIDs),
+        "login_epoch":      gorm.Expr("login_epoch + 1"), // invalidate existing sessions
+    }
+    if password != "" {
+        hashed, err := crypto.HashPasswordAsBcrypt(password)
+        if err != nil { return err }
+        updates["password"] = hashed
+    }
+    return db.Model(model.User{}).Where("id = ? AND role != 'owner'", id).Updates(updates).Error
+}
+
+func (s *UserService) DeleteSubAdmin(id int) error {
+    db := database.GetDB()
+    return db.Where("id = ? AND role != 'owner'", id).Delete(model.User{}).Error
+}

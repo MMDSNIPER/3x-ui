@@ -79,7 +79,17 @@ func (a *InboundController) initRouter(g *gin.RouterGroup) {
 // getInbounds retrieves the list of inbounds for the logged-in user.
 func (a *InboundController) getInbounds(c *gin.Context) {
 	user := session.GetLoginUser(c)
+	allowedIDs, fullAccess := middleware.AllowedInboundsFromCtx(c)
 	inbounds, err := a.inboundService.GetInbounds(user.Id)
+	if !fullAccess {
+		filtered := []*model.Inbound{}
+		for _, ib := range inbounds {
+			for _, aid := range allowedIDs {
+				if ib.Id == aid { filtered = append(filtered, ib); break }
+			}
+		}
+		inbounds = filtered
+	}
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
 		return
@@ -170,6 +180,11 @@ func (a *InboundController) addInbound(c *gin.Context) {
 
 // delInbound deletes an inbound configuration by its ID.
 func (a *InboundController) delInbound(c *gin.Context) {
+	user := session.GetLoginUser(c)
+	if !user.CanAccessInbound(inboundId) {
+		pureJsonMsg(c, http.StatusForbidden, false, "no access to this inbound")
+		return
+	}
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.inboundDeleteSuccess"), err)
@@ -187,7 +202,6 @@ func (a *InboundController) delInbound(c *gin.Context) {
 	user := session.GetLoginUser(c)
 	a.broadcastInboundsUpdate(user.Id)
 }
-
 // updateInbound updates an existing inbound configuration.
 func (a *InboundController) updateInbound(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
@@ -195,6 +209,13 @@ func (a *InboundController) updateInbound(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.inboundUpdateSuccess"), err)
 		return
 	}
+
+	user := session.GetLoginUser(c)
+	if !user.CanAccessInbound(id) {
+		pureJsonMsg(c, http.StatusForbidden, false, I18nWeb(c, "noPermission"))
+		return
+	}
+
 	inbound := &model.Inbound{
 		Id: id,
 	}
@@ -203,6 +224,17 @@ func (a *InboundController) updateInbound(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.inboundUpdateSuccess"), err)
 		return
 	}
+
+	if !user.HasFullAccess() {
+		existing, getErr := a.inboundService.GetInbound(id)
+		if getErr != nil {
+			jsonMsg(c, I18nWeb(c, "somethingWentWrong"), getErr)
+			return
+		}
+		inbound.Total = existing.Total
+	}
+
+
 	// Same NodeID=0 → nil normalisation as addInbound. UpdateInbound
 	// loads the existing row's NodeID from DB anyway (Phase 1 doesn't
 	// support migrating an inbound between nodes), but normalising here
@@ -219,7 +251,6 @@ func (a *InboundController) updateInbound(c *gin.Context) {
 	if needRestart {
 		a.xrayService.SetToNeedRestart()
 	}
-	user := session.GetLoginUser(c)
 	a.broadcastInboundsUpdate(user.Id)
 }
 

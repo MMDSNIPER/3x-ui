@@ -60,6 +60,7 @@ func (a *APIController) initRouter(g *gin.RouterGroup, customGeo *service.Custom
 	api := g.Group("/panel/api")
 	api.Use(a.checkAPIAuth)
 	api.Use(middleware.CSRFMiddleware())
+    api.Use(middleware.InjectInboundAccess())
 
 	// Inbounds API
 	inbounds := api.Group("/inbounds")
@@ -77,6 +78,8 @@ func (a *APIController) initRouter(g *gin.RouterGroup, customGeo *service.Custom
 	a.nodeController = NewNodeController(nodes)
 
 	NewCustomGeoController(api.Group("/custom-geo"), customGeo)
+
+	NewAdminController(api)
 
 	// Extra routes
 	api.POST("/backuptotgbot", a.BackuptoTgbot)

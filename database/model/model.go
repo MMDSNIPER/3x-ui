@@ -580,3 +580,27 @@ func MergeClientRecord(existing *ClientRecord, incoming *ClientRecord) []ClientM
 	}
 	return conflicts
 }
+
+func (u *User) IsOwner() bool {
+    return u.Role == "owner"
+}
+
+func (u *User) GetAllowedInboundIDs() []int {
+    var ids []int
+    json.Unmarshal([]byte(u.AllowedInbounds), &ids)
+    return ids
+}
+
+func (u *User) HasFullAccess() bool {
+    return u.IsOwner() || len(u.GetAllowedInboundIDs()) == 0
+}
+
+func (u *User) CanAccessInbound(id int) bool {
+    if u.HasFullAccess() {
+        return true
+    }
+    for _, aid := range u.GetAllowedInboundIDs() {
+        if aid == id { return true }
+    }
+    return false
+}
