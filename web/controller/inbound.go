@@ -182,14 +182,15 @@ func (a *InboundController) addInbound(c *gin.Context) {
 
 // delInbound deletes an inbound configuration by its ID.
 func (a *InboundController) delInbound(c *gin.Context) {
-	user := session.GetLoginUser(c)
-	if !user.CanAccessInbound(id) {
-		pureJsonMsg(c, http.StatusForbidden, false, "no access to this inbound")
-		return
-	}
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.inboundDeleteSuccess"), err)
+		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.inboundUpdateSuccess"), err)
+		return
+	}
+
+	user := session.GetLoginUser(c)
+	if !user.CanAccessInbound(id) {
+		pureJsonMsg(c, http.StatusForbidden, false, I18nWeb(c, "noPermission"))
 		return
 	}
 	needRestart, err := a.inboundService.DelInbound(id)
