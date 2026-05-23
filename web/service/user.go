@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 
 	"github.com/mhsanaei/3x-ui/v3/database"
@@ -177,37 +178,45 @@ func (s *UserService) ListSubAdmins() ([]*model.User, error) {
 }
 
 func (s *UserService) CreateSubAdmin(username, password string, allowedInboundIDs []int) error {
-    db := database.GetDB()
-    hashed, err := crypto.HashPasswordAsBcrypt(password)
-    if err != nil { return err }
-    idsJSON, _ := json.Marshal(allowedInboundIDs)
-    user := &model.User{
-        Username:        username,
-        Password:        hashed,
-        Role:            "admin",
-        AllowedInbounds: string(idsJSON),
-    }
-    return db.Create(user).Error
+	db := database.GetDB()
+	hashed, err := crypto.HashPasswordAsBcrypt(password)
+	if err != nil {
+		return err
+	}
+	idsJSON, _ := json.Marshal(allowedInboundIDs)  // inline
+	user := &model.User{
+		Username:        username,
+		Password:        hashed,
+		Role:            "admin",
+		AllowedInbounds: string(idsJSON),
+	}
+	return db.Create(user).Error
 }
 
 func (s *UserService) UpdateSubAdmin(id int, username, password string, allowedInboundIDs []int) error {
-    db := database.GetDB()
-    // Prevent modifying the owner
-    var existing model.User
-    if err := db.First(&existing, id).Error; err != nil { return err }
-    if existing.Role == "owner" { return errors.New("cannot modify owner") }
+	db := database.GetDB()
+	var existing model.User
+	if err := db.First(&existing, id).Error; err != nil {
+		return err
+	}
+	if existing.Role == "owner" {
+		return errors.New("cannot modify owner")
+	}
 
-    updates := map[string]any{
-        "username":         username,
-        "allowed_inbounds": mustJSON(allowedInboundIDs),
-        "login_epoch":      gorm.Expr("login_epoch + 1"), // invalidate existing sessions
-    }
-    if password != "" {
-        hashed, err := crypto.HashPasswordAsBcrypt(password)
-        if err != nil { return err }
-        updates["password"] = hashed
-    }
-    return db.Model(model.User{}).Where("id = ? AND role != 'owner'", id).Updates(updates).Error
+	idsJSON, _ := json.Marshal(allowedInboundIDs)  // inline — mustJSON removed
+	updates := map[string]any{
+		"username":         username,
+		"allowed_inbounds": string(idsJSON),
+		"login_epoch":      gorm.Expr("login_epoch + 1"),
+	}
+	if password != "" {
+		hashed, err := crypto.HashPasswordAsBcrypt(password)
+		if err != nil {
+			return err
+		}
+		updates["password"] = hashed
+	}
+	return db.Model(model.User{}).Where("id = ? AND role != 'owner'", id).Updates(updates).Error
 }
 
 func (s *UserService) DeleteSubAdmin(id int) error {

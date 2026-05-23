@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/mhsanaei/3x-ui/v3/database/model"
+	"github.com/mhsanaei/3x-ui/v3/web/middleware"
 	"github.com/mhsanaei/3x-ui/v3/web/service"
 	"github.com/mhsanaei/3x-ui/v3/web/session"
 	"github.com/mhsanaei/3x-ui/v3/web/websocket"
@@ -202,7 +204,7 @@ func (a *InboundController) delInbound(c *gin.Context) {
 	user := session.GetLoginUser(c)
 	a.broadcastInboundsUpdate(user.Id)
 }
-// updateInbound updates an existing inbound configuration.
+
 func (a *InboundController) updateInbound(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -234,11 +236,6 @@ func (a *InboundController) updateInbound(c *gin.Context) {
 		inbound.Total = existing.Total
 	}
 
-
-	// Same NodeID=0 → nil normalisation as addInbound. UpdateInbound
-	// loads the existing row's NodeID from DB anyway (Phase 1 doesn't
-	// support migrating an inbound between nodes), but normalising here
-	// keeps the wire shape consistent.
 	if inbound.NodeID != nil && *inbound.NodeID == 0 {
 		inbound.NodeID = nil
 	}
