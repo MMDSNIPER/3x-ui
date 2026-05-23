@@ -211,7 +211,9 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	if config.IsDebug() {
 		engine.StaticFS(basePath+"assets", http.FS(os.DirFS("web/dist/assets")))
 	} else {
-		engine.StaticFS(basePath+"assets", http.FS(&wrapDistFS{FS: distFS}))
+		if basePath != "/" && basePath != "" {
+			engine.StaticFS("/assets", http.FS(&wrapDistFS{FS: distFS}))
+		}
 	}
 
 	// Apply the redirect middleware (`/xui` to `/panel`)

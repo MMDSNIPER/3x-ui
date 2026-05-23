@@ -73,8 +73,8 @@ export default function AdminsPage() {
 
   const fetchData = useCallback(async () => {
     const [adminsRes, inboundsRes] = await Promise.all([
-      HttpUtil.post('/panel/api/admins', undefined, { silent: true }),
-      HttpUtil.post('/panel/api/inbounds/list', undefined, { silent: true }),
+        HttpUtil.get('/panel/api/admins', undefined, { silent: true }),
+        HttpUtil.get('/panel/api/inbounds/list', undefined, { silent: true }),
     ]);
     if (adminsRes?.success) {
       setAdmins(

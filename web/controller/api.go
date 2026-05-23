@@ -56,32 +56,25 @@ func (a *APIController) checkAPIAuth(c *gin.Context) {
 
 // initRouter sets up the API routes for inbounds, server, and other endpoints.
 func (a *APIController) initRouter(g *gin.RouterGroup, customGeo *service.CustomGeoService) {
-	// Main API group
 	api := g.Group("/panel/api")
 	api.Use(a.checkAPIAuth)
 	api.Use(middleware.CSRFMiddleware())
-    api.Use(middleware.InjectInboundAccess())
 
-	// Inbounds API
 	inbounds := api.Group("/inbounds")
 	a.inboundController = NewInboundController(inbounds)
 
 	clients := api.Group("/clients")
 	NewClientController(clients)
 
-	// Server API
 	server := api.Group("/server")
 	a.serverController = NewServerController(server)
 
-	// Nodes API — multi-panel management
 	nodes := api.Group("/nodes")
 	a.nodeController = NewNodeController(nodes)
 
 	NewCustomGeoController(api.Group("/custom-geo"), customGeo)
+	NewAdminController(api)        // ← add this line
 
-	NewAdminController(api)
-
-	// Extra routes
 	api.POST("/backuptotgbot", a.BackuptoTgbot)
 }
 

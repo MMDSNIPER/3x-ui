@@ -72,6 +72,7 @@
   "secAlertSubURI": "Subscription default URI path is insecure. Please configure a complex URI path.",
   "secAlertSubJsonURI": "Subscription JSON default URI path is insecure. Please configure a complex URI path.",
   "emptyDnsDesc": "No added DNS servers.",
+  "noPermission": "You do not have permission to perform this action",
   "emptyFakeDnsDesc": "No added Fake DNS servers.",
   "emptyBalancersDesc": "No added balancers.",
   "emptyReverseDesc": "No added reverse proxies.",
@@ -120,18 +121,24 @@
       }
     },
     "admins": {
+      "title": "Admin Management",
       "addAdmin": "Add Admin",
       "editAdmin": "Edit Admin",
+      "username": "Username",
+      "password": "Password",
+      "passwordHint": "Leave blank to keep current password",
       "allowedInbounds": "Allowed Inbounds",
-      "actions": "Actions",
-      "selectInbounds": "Select inbounds this admin can access",
-      "inboundsHint": "Leave empty to grant access to no inbounds.",
-      "noInbounds": "No inbounds",
-      "leaveBlankToKeep": "Leave blank to keep current password",
-      "confirmPassword": "Confirm Password",
-      "passwordMismatch": "Passwords do not match",
-      "deleteTitle": "Delete Admin",
-      "deleteContent": "Are you sure you want to delete admin \"{username}\"?"
+      "allowedInboundsHint": "Leave empty to grant full access to all inbounds",
+      "fullAccess": "Full Access",
+      "deleteConfirmTitle": "Delete admin \"{username}\"?",
+      "deleteConfirmContent": "This admin will lose panel access immediately.",
+      "toasts": {
+        "created": "Admin created",
+        "updated": "Admin updated",
+        "deleted": "Admin deleted",
+        "usernameRequired": "Username is required",
+        "passwordRequired": "Password is required"
+      }
     },
     "index": {
       "title": "Overview",

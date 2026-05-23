@@ -184,6 +184,17 @@ func runSeeders(isUsersEmpty bool) error {
 			return err
 		}
 	}
+	
+	if !slices.Contains(seedersHistory, "OwnerRole") {
+        if err := db.Model(&model.User{}).
+            Where("id = 1 AND role = 'admin'").
+            Update("role", "owner").Error; err != nil {
+            return err
+        }
+        if err := db.Create(&model.HistoryOfSeeders{SeederName: "OwnerRole"}).Error; err != nil {
+            return err
+        }
+    }
 
 	if !slices.Contains(seedersHistory, "ApiTokensTable") {
 		if err := seedApiTokens(); err != nil {
