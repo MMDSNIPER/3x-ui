@@ -17,17 +17,15 @@ import (
 
 // InboundController handles HTTP requests related to Xray inbounds management.
 type InboundController struct {
-    inboundService  service.InboundService
-    xrayService     service.XrayService
-    fallbackService service.FallbackService
-    userService     service.UserService    // ← add
+	inboundService  service.InboundService
+	xrayService     service.XrayService
+	fallbackService service.FallbackService
 }
 
 // NewInboundController creates a new InboundController and sets up its routes.
 func NewInboundController(g *gin.RouterGroup) *InboundController {
 	a := &InboundController{}
 	a.initRouter(g)
- a.userService = service.UserService{}
 	return a
 }
 
@@ -63,9 +61,11 @@ func (a *InboundController) broadcastInboundsUpdate(userId int) {
 func (a *InboundController) initRouter(g *gin.RouterGroup) {
 
 	g.GET("/list", a.getInbounds)
+	g.GET("/list/slim", a.getInboundsSlim)
 	g.GET("/options", a.getInboundOptions)
 	g.GET("/get/:id", a.getInbound)
 	g.GET("/:id/fallbacks", a.getFallbacks)
+
 	g.POST("/add", a.addInbound)
 	g.POST("/del/:id", a.delInbound)
 	g.POST("/update/:id", a.updateInbound)
@@ -79,21 +79,6 @@ func (a *InboundController) initRouter(g *gin.RouterGroup) {
 // getInbounds retrieves the list of inbounds for the logged-in user.
 func (a *InboundController) getInbounds(c *gin.Context) {
 	user := session.GetLoginUser(c)
-	if user.Role == "sub-admin" {
-		adminUser, err := a.userService.GetAdminUser()
-		if err != nil {
-			jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
-			return
-		}
-		allowedIDs := a.userService.GetAllowedInboundIDs(user)
-		inbounds, err := a.inboundService.GetInboundsByIDs(adminUser.Id, allowedIDs)
-		if err != nil {
-			jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
-			return
-		}
-		jsonObj(c, inbounds, nil)
-		return
-	}
 	inbounds, err := a.inboundService.GetInbounds(user.Id)
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
@@ -102,36 +87,23 @@ func (a *InboundController) getInbounds(c *gin.Context) {
 	jsonObj(c, inbounds, nil)
 }
 
+// getInboundsSlim is the list-page variant that strips full client
+// payloads from settings.clients[]. Detail-view flows still use /get/:id.
+func (a *InboundController) getInboundsSlim(c *gin.Context) {
+	user := session.GetLoginUser(c)
+	inbounds, err := a.inboundService.GetInboundsSlim(user.Id)
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
+		return
+	}
+	jsonObj(c, inbounds, nil)
+}
 
 // getInboundOptions returns a lightweight projection of the user's inbounds
 // (id, remark, protocol, port, tlsFlowCapable) for pickers in the clients UI.
 // Avoids shipping per-client settings and traffic stats just to fill a dropdown.
 func (a *InboundController) getInboundOptions(c *gin.Context) {
 	user := session.GetLoginUser(c)
-	if user.Role == "sub-admin" {
-		adminUser, err := a.userService.GetAdminUser()
-		if err != nil {
-			jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
-			return
-		}
-		allowedIDs := a.userService.GetAllowedInboundIDs(user)
-		inbounds, err := a.inboundService.GetInboundsByIDs(adminUser.Id, allowedIDs)
-		if err != nil {
-			jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
-			return
-		}
-		options := make([]any, 0, len(inbounds))
-		for _, ib := range inbounds {
-			options = append(options, map[string]any{
-				"id":       ib.Id,
-				"remark":   ib.Remark,
-				"protocol": ib.Protocol,
-				"port":     ib.Port,
-			})
-		}
-		jsonObj(c, options, nil)
-		return
-	}
 	options, err := a.inboundService.GetInboundOptions(user.Id)
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
@@ -139,7 +111,6 @@ func (a *InboundController) getInboundOptions(c *gin.Context) {
 	}
 	jsonObj(c, options, nil)
 }
-
 
 // getInbound retrieves a specific inbound by its ID.
 func (a *InboundController) getInbound(c *gin.Context) {
@@ -413,4 +384,3 @@ func (a *InboundController) setFallbacks(c *gin.Context) {
 	a.xrayService.SetToNeedRestart()
 	jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.inboundUpdateSuccess"), nil)
 }
-

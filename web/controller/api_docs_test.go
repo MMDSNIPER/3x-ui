@@ -81,8 +81,6 @@ func TestAPIRoutesDocumented(t *testing.T) {
 		switch entry.Name() {
 		case "index.go":
 			basePath = ""
-		case "admin.go":
-    		basePath = "/panel/api/admins"
 		case "xui.go":
 			basePath = "/panel"
 		case "api.go":
@@ -134,7 +132,6 @@ func TestAPIRoutesDocumented(t *testing.T) {
 			"/panel/clients": true,
 			"/panel/nodes":   true, "/panel/settings": true,
 			"/panel/xray": true, "/panel/api-docs": true,
-			"/panel/admins": true,   // <-- add this line
 		}
 		if spaPages[r.Path] {
 			continue
