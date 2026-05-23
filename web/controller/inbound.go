@@ -183,7 +183,7 @@ func (a *InboundController) addInbound(c *gin.Context) {
 // delInbound deletes an inbound configuration by its ID.
 func (a *InboundController) delInbound(c *gin.Context) {
 	user := session.GetLoginUser(c)
-	if !user.CanAccessInbound(inboundId) {
+	if !user.CanAccessInbound(id) {
 		pureJsonMsg(c, http.StatusForbidden, false, "no access to this inbound")
 		return
 	}
@@ -201,7 +201,6 @@ func (a *InboundController) delInbound(c *gin.Context) {
 	if needRestart {
 		a.xrayService.SetToNeedRestart()
 	}
-	user := session.GetLoginUser(c)
 	a.broadcastInboundsUpdate(user.Id)
 }
 
